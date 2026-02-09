@@ -1,0 +1,19 @@
+[package]
+name = "pizza-wordsearch"
+version = "0.1.0"
+edition = "2021"
+authors = ["Pizza Wordsearch Contributors"]
+description = "A deterministic word search puzzle generator using classic algorithms"
+license = "MIT"
+keywords = ["wordsearch", "puzzle", "game", "generator"]
+categories = ["games"]
+
+[dependencies]
+rand = "0.8"
+unicode-normalization = "0.1"
+printpdf = "0.7"
+chrono = "0.4"
+
+[profile.release]
+opt-level = 3
+lto = true
