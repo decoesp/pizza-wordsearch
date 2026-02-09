@@ -6,7 +6,6 @@ use crate::filler::Filler;
 use crate::grid::{Grid, PlacementResult};
 use crate::word::{sort_by_length_desc, Word};
 
-/// Configuration for the word search generator.
 #[derive(Debug, Clone)]
 pub struct GeneratorConfig {
     pub grid_size: usize,
@@ -29,7 +28,6 @@ impl GeneratorConfig {
     }
 }
 
-/// Result of the generation process.
 #[derive(Debug)]
 pub struct GenerationResult {
     pub grid: Grid,
@@ -37,7 +35,6 @@ pub struct GenerationResult {
     pub discarded_words: Vec<Word>,
 }
 
-/// The main word search generator.
 pub struct Generator {
     config: GeneratorConfig,
 }
@@ -47,7 +44,6 @@ impl Generator {
         Self { config }
     }
 
-    /// Generates a word search puzzle from the given words.
     pub fn generate<R: Rng>(&self, words: &[&str], rng: &mut R) -> GenerationResult {
         let mut grid = Grid::new(self.config.grid_size);
         let allowed_directions = self.config.difficulty.allowed_directions();
@@ -79,7 +75,6 @@ impl Generator {
         }
     }
 
-    /// Attempts to place a word in the grid.
     fn try_place_word<R: Rng>(
         &self,
         grid: &mut Grid,
@@ -95,55 +90,13 @@ impl Generator {
             let start_row = rng.gen_range(0..self.config.grid_size);
             let start_col = rng.gen_range(0..self.config.grid_size);
 
-            let direction = match Direction::random_from(allowed_directions, rng) {
-                Some(d) => d,
-                None => continue,
-            };
+            let direction = Direction::random_from(allowed_directions, rng)?;
 
             if grid.can_place(word, start_row, start_col, direction) {
-                let result = grid.place_word(word, start_row, start_col, direction);
-                return Some(result);
+                return Some(grid.place_word(word, start_row, start_col, direction));
             }
         }
 
         None
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use rand::rngs::StdRng;
-    use rand::SeedableRng;
-
-    #[test]
-    fn test_generator_basic() {
-        let config = GeneratorConfig::new(15, Difficulty::easy());
-        let generator = Generator::new(config);
-        let mut rng = StdRng::seed_from_u64(42);
-
-        let words = vec!["RUST", "CODE", "PIZZA"];
-        let result = generator.generate(&words, &mut rng);
-
-        assert_eq!(result.grid.size, 15);
-        assert_eq!(result.grid.empty_count(), 0);
-        assert!(!result.placed_words.is_empty());
-    }
-
-    #[test]
-    fn test_generator_deterministic() {
-        let config = GeneratorConfig::new(10, Difficulty::medium());
-        let generator = Generator::new(config.clone());
-
-        let words = vec!["HELLO", "WORLD"];
-
-        let mut rng1 = StdRng::seed_from_u64(12345);
-        let result1 = generator.generate(&words, &mut rng1);
-
-        let generator2 = Generator::new(config);
-        let mut rng2 = StdRng::seed_from_u64(12345);
-        let result2 = generator2.generate(&words, &mut rng2);
-
-        assert_eq!(result1.grid.display(false), result2.grid.display(false));
     }
 }

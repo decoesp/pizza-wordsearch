@@ -24,13 +24,8 @@ fn main() {
         }
     };
 
-    let seed = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
-
-    let config = GeneratorConfig::new(input.grid_size, input.difficulty.clone())
-        .with_max_attempts(200);
+    let seed = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let config = GeneratorConfig::new(input.grid_size, input.difficulty.clone()).with_max_attempts(200);
     let generator = Generator::new(config);
 
     let words_refs: Vec<&str> = input.words.iter().map(|s| s.as_str()).collect();
@@ -43,13 +38,7 @@ fn main() {
 
     println!("\nPalavras encontradas ({}):", result.placed_words.len());
     for placement in &result.placed_words {
-        println!(
-            "  ✓ {} @ ({}, {}) {:?}",
-            placement.word.original,
-            placement.row,
-            placement.col,
-            placement.direction
-        );
+        println!("  ✓ {} @ ({}, {}) {:?}", placement.word.original, placement.row, placement.col, placement.direction);
     }
 
     if !result.discarded_words.is_empty() {
@@ -59,15 +48,12 @@ fn main() {
         }
     }
 
-    let safe_title: String = input
-        .title
-        .chars()
+    let safe_title: String = input.title.chars()
         .filter(|c| c.is_alphanumeric() || *c == ' ' || *c == '-' || *c == '_')
         .collect::<String>()
         .replace(' ', "_")
         .to_lowercase();
 
-    // Create pdf/{tema}/ directory
     let pdf_dir = format!("pdf/{}", safe_title);
     if let Err(e) = fs::create_dir_all(&pdf_dir) {
         eprintln!("Erro ao criar diretório {}: {}", pdf_dir, e);
@@ -76,7 +62,6 @@ fn main() {
 
     let puzzle_filename = format!("{}/puzzle.pdf", pdf_dir);
     let answer_filename = format!("{}/gabarito.pdf", pdf_dir);
-
     let pdf_gen = PdfGenerator::new(&input.title);
 
     println!("\n📄 Gerando PDFs em {}/ ...", pdf_dir);
@@ -97,15 +82,12 @@ fn main() {
 fn print_grid(grid: &grid::Grid) {
     let border = "─".repeat(grid.size * 2 + 1);
     println!("┌{}┐", border);
-
     for row in &grid.cells {
         print!("│ ");
         for cell in row {
-            let ch = cell.unwrap_or('.');
-            print!("{} ", ch);
+            print!("{} ", cell.unwrap_or('.'));
         }
         println!("│");
     }
-
     println!("└{}┘", border);
 }
